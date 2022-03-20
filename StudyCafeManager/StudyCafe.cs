@@ -157,6 +157,7 @@ namespace StudyCafeManager
         #region<User Method>
         public void AddUser()
         {
+            Console.Clear();
             bool start = true;
             string name = null;
             string email = null;
@@ -180,6 +181,7 @@ namespace StudyCafeManager
                 if(users.ContainsKey(email))
                 {
                     Console.WriteLine("기존에 있는 이메일입니다. 다시 입력해주세요");
+                    Console.ReadLine();
                     start = true;
                     continue;
                 }
@@ -189,6 +191,8 @@ namespace StudyCafeManager
 
             users.Add(email, new User(name, email, pw));
             Save_user();
+            Console.WriteLine("회원가입이 완료되었습니다. 엔터를 입력하면 메인으로 돌아갑니다.");
+            Console.ReadLine();
         }
 
         public bool Check_email(string email)
@@ -490,7 +494,7 @@ namespace StudyCafeManager
         }
         private void Save_user()
         {
-            string user_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_user.txt";
+            string user_path = $@"C:\StudyCafeTest\user.txt";
 
             using (Stream user_save = new FileStream(user_path, FileMode.OpenOrCreate))
             {
