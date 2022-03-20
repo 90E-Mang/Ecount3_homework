@@ -55,7 +55,7 @@ namespace StudyCafeManager
                         person = login();
                         if (person == null)
                         {
-                            Console.WriteLine("아아디, 비밀번호를 잘못 입력했습니다. 엔터를 누르면 돌아갑니다.");
+                            Console.WriteLine("이메일, 비밀번호를 잘못 입력했습니다. 엔터를 누르면 돌아갑니다.");
                             Console.ReadLine();
                             break;
                         }
@@ -102,12 +102,15 @@ namespace StudyCafeManager
                             break;
                         case "2":
                             CheckAllBook();
+                            Console.WriteLine("엔터키를 입력하면 메인으로 돌아갑니다. ");
+                            Console.ReadLine();
                             break;
                         case "3":
                             Block();
                             break;
                         case "4":
                             mainMenu = false;
+                            person = null;
                             break;
                         default:
                             Console.WriteLine("1,2,3,4 만 입력해주세요. 엔터를 누르면 돌아갑니다.");
@@ -141,6 +144,8 @@ namespace StudyCafeManager
                             break;
                         case "5":
                             DelUser();
+                            person = null;
+                            mainMenu = false;
                             break;
                         case "6":
                             mainMenu = false;
@@ -216,27 +221,42 @@ namespace StudyCafeManager
 
             if (chooseDel == "1")
             {
-                users.Remove(person.Email);
+                foreach (var item in bookStatus)
+                {
+                    if (item.Value.Email == person.Email)
+                    {
+                        seat[seat.FindIndex(x => x.SeatNum == item.Key.SeatNum)].Status = "예약가능";
+                        bookStatus.Remove(item.Key); //키값지우기
+                        users.Remove(person.Email);
+                        break;
+                    }
+                }
             }
             else
             {
                 return;
             }
             Save_user();
+            Save_bookstatus();
+            Save_seat();
+            person = null;
+            Console.WriteLine("회원탈퇴가 완료되었습니다. 엔터키를 누르면 메인으로 돌아갑니다.");
+            Console.ReadLine();
         }
         public void CheckBook()  //user 가 자신의 예약내역을 확인한다.
         {
             Console.Clear();
-            Console.WriteLine("예약 되었습니다");
             foreach (var item in bookStatus)
             {
-                if (item.Value == person)
+                if (item.Value.Email == person.Email)
                 {
-                    Console.WriteLine($"예약하신 좌석은{item.Key}입니다.");
+                    Console.WriteLine($"예약하신 좌석은{item.Key.SeatNum}입니다. 엔터를 누르면 돌아갑니다.");
+                    Console.ReadLine();
                     return;
                 }
             }
-            Console.WriteLine("예약하신 좌석이 없습니다.");
+            Console.WriteLine("예약하신 좌석이 없습니다. 엔터를 누르면 메인으로 돌아갑니다.");
+            Console.ReadLine();
         }
         public void Book()
         {
@@ -245,7 +265,15 @@ namespace StudyCafeManager
 
             // 좌석현황 보여주기 
             ShowAllSeat();
-
+            foreach (var item in bookStatus)
+            {
+                if (item.Value.Email == person.Email)
+                {
+                    Console.WriteLine("이미 예약하신 좌석이 있습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                    Console.ReadLine();
+                    return;
+                }
+            }
             Console.WriteLine("좌석을 선택해 주세요");
 
             string input = Console.ReadLine();
@@ -262,7 +290,9 @@ namespace StudyCafeManager
                     if (input2 == "1")
                     {
                         bookStatus.Add(seat[seat.FindIndex(x => x.SeatNum == input)], person);
+                        seat[seat.FindIndex(x => x.SeatNum == input)].Status = "예약완료";
                         Save_bookstatus();
+                        Save_seat();
                         select = false;
                         break;
                     }
@@ -275,11 +305,13 @@ namespace StudyCafeManager
                     else
                     {
                         Console.WriteLine("1. 예약하기 또는 2. 뒤로가기를 입력해주세요.");
+                        Console.ReadLine();
                     }                   
                 }
                 else
                 {
-                    Console.WriteLine("예약 불가능한 좌석입니다");
+                    Console.WriteLine("예약 불가능한 좌석입니다. 엔터를 누르면 돌아갑니다.");
+                    Console.ReadLine();
                     select = false;
                 }
             }
@@ -287,43 +319,51 @@ namespace StudyCafeManager
         public void Change()
         {
             Console.Clear();
-            Console.WriteLine("좌석을 변경하시겠습니까? \n 1.네 2. 아니오 \n (2번 선택시 메인으로 돌아갑니다");
+            Console.WriteLine("좌석을 변경하시겠습니까? 1.네 2. 아니오 (2번 선택시 메인으로 돌아갑니다");
             select = Console.ReadLine();
             if (select == "1")
             {
                 //private List<ISeat> seat
                 //자기예약한좌석 불러와서 예약없애고 새로등록
-
+                ShowAllSeat();
+                string nowSeatNum = null;
+                foreach (var item in bookStatus)
+                {
+                    if (item.Value.Email == person.Email)
+                    {
+                        nowSeatNum = item.Key.SeatNum;
+                        break;
+                    }
+                }
+                Console.Write($"{person.Name}님이 현재 예약하신 좌석은 {nowSeatNum}입니다. 어느 좌석으로 변경하시겠습니까? 좌석을 입력해주세요 : ");
                 string input = Console.ReadLine();  //방이 맞는지 안맞는지 - > 13개 seatnum 중에 내가 입력한걸 체크해서
                 bool seatnumT = seat.Exists(x => x.SeatNum == input && x.Status == "예약가능");
                 if (seatnumT == true)
                 {
                     Console.WriteLine("예약 가능한 좌석입니다. 예약하시겠습니까? 1.예약 2.아니오");
-                    input = Console.ReadLine();
-                    if (input == "1")
+                    string choice = Console.ReadLine();
+                    if (choice == "1")
                     {
-                        //예약
-                        input = "예약완료";
+                        ISeat key = bookStatus.FirstOrDefault(x => x.Value.Email == person.Email).Key;
+                        seat[seat.FindIndex(x => x.SeatNum == key.SeatNum)].Status = "예약가능";
+                        bookStatus.Remove(key); //키값지우기
+                        bookStatus.Add(seat[seat.FindIndex(x => x.SeatNum == input)], person);
+                        seat[seat.FindIndex(x => x.SeatNum == input)].Status = "예약완료";
+                        Save_bookstatus();
+                        Save_seat();
+                        Console.WriteLine("예약 변경이 완료되었습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                        Console.ReadLine();
+                        return;                        
                     }
                     else
                     {
                         return;
-                    }
-                    foreach (KeyValuePair<ISeat, Person> item in bookStatus)
-                    {
-                        if (item.Value == person)
-                        {
-                            seat[seat.FindIndex(x => x.SeatNum == item.Key.SeatNum)].Status = "예약가능";
-                            bookStatus.Remove(item.Key); //키값지우기
-                            ISeat changeseat = seat[seat.FindIndex(x => x.SeatNum == input)];
-                            bookStatus.Add(changeseat, person);
-                            changeseat.Status = "예약완료";
-                        }
-                    }
+                    }                                     
                 }
                 else
                 {
-                    Console.WriteLine("예약하신 좌석이 없습니다.");
+                    Console.WriteLine("선택하신 좌석은 예약이 불가능 합니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                    Console.ReadLine();
                 }
             }
             else if (select == "2")
@@ -341,7 +381,31 @@ namespace StudyCafeManager
 
         public void CancleBook()
         {
-
+            Console.Clear();
+            foreach (var item in bookStatus)
+            {
+                if (item.Value.Email == person.Email)
+                {
+                    Console.WriteLine($"예약하신 좌석은{item.Key.SeatNum}입니다. 예약을 취소하시겠습니까? 1 : 취소, 2 : 돌아가기");
+                    string choice = Console.ReadLine();
+                    switch (choice)
+                    {
+                        case "1":
+                            seat[seat.FindIndex(x => x.SeatNum == item.Key.SeatNum)].Status = "예약가능";
+                            bookStatus.Remove(item.Key); //키값지우기
+                            Save_bookstatus();
+                            Save_seat();
+                            return;
+                        case "2":
+                            break;
+                        default:
+                            Console.WriteLine("1 또는 2만 입력가능합니다.");
+                            break;
+                    }
+                }
+            }
+            Console.WriteLine("예약 취소가 완료되었습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+            Console.ReadLine();
         }
         #endregion
         #region<Admin Method>
@@ -359,20 +423,12 @@ namespace StudyCafeManager
         }
         public void CheckAllBook()
         {
-            Console.Clear();
-            Console.WriteLine("현재 좌석현황입니다.");
+            Console.WriteLine("현재 전체 예약현황입니다.");
 
-            foreach (var key in bookStatus)
+            foreach (var item in bookStatus)
             {
-                Console.WriteLine(key);
-            }
-            foreach (var status in seat)
-            {
-                if (status.Status == "예약완료")
-                {
-                    Console.WriteLine($"{person.Name},{person.Email},{status.SeatNum}");
-                }
-            }
+                Console.WriteLine($"좌석번호 : {item.Key.SeatNum}, 예약자명 : {item.Value.Name}, 이메일 : {item.Value.Email}");               
+            }           
         }
         public void Block()
         {
@@ -380,40 +436,40 @@ namespace StudyCafeManager
 
             ShowAllSeat();
             CheckAllBook();
-
-            Console.WriteLine("금지할 좌석을 선택해 주세요");
-
-            string input = Console.ReadLine();
-            bool select = true;
-
-            while (select)
+            if (true)   // 금지하기
             {
+                Console.WriteLine("금지할 좌석을 선택해 주세요");
+
+                string input = Console.ReadLine();
 
                 if (seat.Exists(x => x.SeatNum == input) && seat[seat.FindIndex(x => x.SeatNum == input)].Status == "예약가능") // 정의해야 함 (예약가능,예약됨,금지)
                 {
                     Console.WriteLine("현재 좌석을 금지 하시겠습니까? 1. 금지하기 2. 뒤로가기");
-                    string input4 = Console.ReadLine();
-
-                    if (input4 == "1")
+                    string choice = Console.ReadLine();
+                    if (choice == "1")
                     {
                         seat[seat.FindIndex(x => x.SeatNum == input)].Status = "예약금지";
                         Save_seat();
+                        Console.WriteLine("예약 금지 지정이 완료되었습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                        Console.ReadLine();
                     }
-                    else if (input4 == "2")
+                    else if (choice == "2")
                     {
-                        Console.WriteLine("관리자 메뉴로 돌아갑니다.");
-                        select = false;
-                        break;
-                    }
-
-
-                    else
-                    {
-                        Console.WriteLine("해당 좌석은 금지가 불가능합니다.");
+                        Console.WriteLine("관리자 메뉴로 돌아갑니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                        Console.ReadLine();
                     }
                     return;
                 }
+                else
+                {
+                    Console.WriteLine("해당 좌석은 금지가 불가능합니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                    Console.ReadLine();
+                }
             }
+            else                // 금지풀기
+            {
+
+            }               
         }
         public void ShowAllBook()
         {
@@ -426,68 +482,42 @@ namespace StudyCafeManager
         }
         #endregion
         #region<Common and Private Method>
-        private List<ISeat> SeatPosition()
-        {
-            return null;
-        }
-
-
         private void Load()
         {
-            string user_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_user.txt";
+            string user_path = $@"C:\StudyCafeTest\user.txt";
             string admin_path = $@"C:\StudyCafeTest\admin.txt";
             string bookstatus_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_bookstatus.txt";
             string seat_path = $@"C:\StudyCafeTest\seat.txt";
 
             // user 로드
-
-            if (!File.Exists(user_path))
-            {
-              
-            }
-
-            else
+            if (File.Exists(user_path))
             {
                 using (Stream user_open = new FileStream(user_path, FileMode.OpenOrCreate))
                 {
-                    
                     BinaryFormatter user_bf = new BinaryFormatter();
-
                     users = (Dictionary<string, Person>)user_bf.Deserialize(user_open);
 
                 }
             }
-
-            
-            //book_status 로드
-            
-            if (!File.Exists(bookstatus_path))
-            {
-            }
-            
-            else
+            //book_status 로드           
+            if (File.Exists(bookstatus_path))
             {
                 using (Stream bookstatus_open = new FileStream(bookstatus_path, FileMode.OpenOrCreate))
                 {
                     BinaryFormatter bookstatus_bf = new BinaryFormatter();
-            
                     bookStatus = (Dictionary<ISeat, Person>)bookstatus_bf.Deserialize(bookstatus_open);
                 }
-            }
-            
-
+            }            
             //seat 로드
             if (!File.Exists(seat_path))
             {
                 Save_seat();
-            }
-            
+            }           
             else
             {
                 using (Stream seat_open = new FileStream(seat_path, FileMode.OpenOrCreate))
                 {
-                    BinaryFormatter seat_bf = new BinaryFormatter();
-            
+                    BinaryFormatter seat_bf = new BinaryFormatter();            
                     seat = (List<ISeat>)seat_bf.Deserialize(seat_open);
                 }
             }
@@ -499,7 +529,6 @@ namespace StudyCafeManager
             using (Stream user_save = new FileStream(user_path, FileMode.OpenOrCreate))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-
                 formatter.Serialize(user_save, users);
             }
 
@@ -512,7 +541,6 @@ namespace StudyCafeManager
             using (Stream bookstatus_save = new FileStream(bookstatus_path, FileMode.OpenOrCreate))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-
                 formatter.Serialize(bookstatus_save, bookStatus);
             }
 
@@ -525,7 +553,6 @@ namespace StudyCafeManager
             using (Stream seat_save = new FileStream(seat_path, FileMode.OpenOrCreate))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-
                 formatter.Serialize(seat_save, seat);
             }
 
@@ -546,7 +573,24 @@ namespace StudyCafeManager
         }
         private void ShowAllSeat()
         {
-
+            Console.WriteLine("--------------개인좌석--------------");
+            foreach (var item in seat)
+            {
+                if (item.SeatNum.Contains("P"))
+                {
+                    Console.Write($"[{item.SeatNum}] : [{item.Status}]    ");
+                }
+            }
+            Console.WriteLine();
+            Console.WriteLine("--------------스터디룸--------------");
+            foreach (var item in seat)
+            {
+                if (item.SeatNum.Contains("R"))
+                {
+                    Console.Write($"[{item.SeatNum}] : [{item.Status}]    ");
+                }
+            }
+            Console.WriteLine();
         }
         public Person login()
         {
