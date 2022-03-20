@@ -258,6 +258,9 @@ namespace StudyCafeManager
                     if (input2 == "1")
                     {
                         bookStatus.Add(seat[seat.FindIndex(x => x.SeatNum == input)], person);
+                        Save_bookstatus();
+                        select = false;
+                        break;
                     }
                     else if (input2 == "2")
                     {
@@ -268,14 +271,12 @@ namespace StudyCafeManager
                     else
                     {
                         Console.WriteLine("1. 예약하기 또는 2. 뒤로가기를 입력해주세요.");
-                    }
-
-                    bookStatus.Add(seat[seat.FindIndex(x => x.SeatNum == input)], person);
-                    Save_bookstatus();
+                    }                   
                 }
                 else
                 {
                     Console.WriteLine("예약 불가능한 좌석입니다");
+                    select = false;
                 }
             }
         }
