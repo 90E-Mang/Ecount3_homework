@@ -19,19 +19,21 @@ namespace StudyCafeManager
         private Admin admin;
         private string select;
         Person person;
-        
+      
         public StudyCafe()
         {
             admin = new Admin();
             users = new Dictionary<string, Person>();
             bookStatus = new Dictionary<ISeat, Person>();
             seat = new List<ISeat>();
+            seat = CreateSeats();
             Load();
         }
 
         #region<Menu part>
         public void Menu()
-        {           
+        {
+
             bool Menu = true;
             while (Menu)
             {
@@ -160,14 +162,27 @@ namespace StudyCafeManager
             string email = null;
             while (start)
             {
-                Console.Clear();
-                Console.Write($"이름 : ");
+                
+                Console.Write($"\n이름 : ");
                 name = Console.ReadLine();
-                Console.Write($"이메일 : ");
+                Console.Write($"\n이메일 : ");
                 email = Console.ReadLine();
 
-                if (Check_email(email)) start = false;
+                if (Check_email(email))
+                {
+                    start = false;
+                }
+                else
+                {
+                    continue;
+                }
                 
+                if(users.ContainsKey(email))
+                {
+                    Console.WriteLine("기존에 있는 이메일입니다. 다시 입력해주세요");
+                    start = true;
+                    continue;
+                }
             }
             Console.Write($"password : ");
             string pw = Console.ReadLine();
@@ -205,17 +220,19 @@ namespace StudyCafeManager
             }
             Save_user();
         }
-        public void CheckBook()
+        public void CheckBook()  //user 가 자신의 예약내역을 확인한다.
         {
             Console.Clear();
-            //회원정보 이름,이메일을 key값으로 딕셔너리 bookStatus에 있으면 띄어주고 없으면 없다고
-
-            foreach (var key in bookStatus)
+            Console.WriteLine("예약 되었습니다");
+            foreach (var item in bookStatus)
             {
-                Console.WriteLine(key.ToString());
+                if (item.Value == person)
+                {
+                    Console.WriteLine($"예약하신 좌석은{item.Key}입니다.");
+                    return;
+                }
             }
-
-
+            Console.WriteLine("예약하신 좌석이 없습니다.");
         }
         public void Book()
         {
@@ -264,8 +281,59 @@ namespace StudyCafeManager
         }
         public void Change()
         {
+            Console.Clear();
+            Console.WriteLine("좌석을 변경하시겠습니까? \n 1.네 2. 아니오 \n (2번 선택시 메인으로 돌아갑니다");
+            select = Console.ReadLine();
+            if (select == "1")
+            {
+                //private List<ISeat> seat
+                //자기예약한좌석 불러와서 예약없애고 새로등록
 
+                string input = Console.ReadLine();  //방이 맞는지 안맞는지 - > 13개 seatnum 중에 내가 입력한걸 체크해서
+                bool seatnumT = seat.Exists(x => x.SeatNum == input && x.Status == "예약가능");
+                if (seatnumT == true)
+                {
+                    Console.WriteLine("예약 가능한 좌석입니다. 예약하시겠습니까? 1.예약 2.아니오");
+                    input = Console.ReadLine();
+                    if (input == "1")
+                    {
+                        //예약
+                        input = "예약완료";
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    foreach (KeyValuePair<ISeat, Person> item in bookStatus)
+                    {
+                        if (item.Value == person)
+                        {
+                            seat[seat.FindIndex(x => x.SeatNum == item.Key.SeatNum)].Status = "예약가능";
+                            bookStatus.Remove(item.Key); //키값지우기
+                            ISeat changeseat = seat[seat.FindIndex(x => x.SeatNum == input)];
+                            bookStatus.Add(changeseat, person);
+                            changeseat.Status = "예약완료";
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("예약하신 좌석이 없습니다.");
+                }
+            }
+            else if (select == "2")
+            {
+                return;
+            }
+            else
+            {
+                Console.WriteLine("잘못입력하셨습니다. 1,2만 입력해주세요");
+                return;
+            }
+
+            Console.WriteLine("예약한 좌석이 없습니다.");
         }
+
         public void CancleBook()
         {
 
@@ -286,7 +354,20 @@ namespace StudyCafeManager
         }
         public void CheckAllBook()
         {
+            Console.Clear();
+            Console.WriteLine("현재 좌석현황입니다.");
 
+            foreach (var key in bookStatus)
+            {
+                Console.WriteLine(key);
+            }
+            foreach (var status in seat)
+            {
+                if (status.Status == "예약완료")
+                {
+                    Console.WriteLine($"{person.Name},{person.Email},{status.SeatNum}");
+                }
+            }
         }
         public void Block()
         {
@@ -329,6 +410,15 @@ namespace StudyCafeManager
                 }
             }
         }
+        public void ShowAllBook()
+        {
+            Console.Clear();
+            Console.WriteLine("현재 좌석 현황입니다.");
+            foreach (var key in bookStatus) //iseat만 보여줌
+            {
+                Console.WriteLine(key);
+            }
+        }
         #endregion
         #region<Common and Private Method>
         private List<ISeat> SeatPosition()
@@ -336,84 +426,66 @@ namespace StudyCafeManager
             return null;
         }
 
-        private void Load_Create()
-        {
-            string user_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_user.txt";
-            string admin_path = $@"C:\StudyCafeTest\admin.txt";
-            string bookstatus_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_bookstatus.txt";
-            string seat_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_seat.txt";
-
-
-        }
-
-
 
         private void Load()
         {
             string user_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_user.txt";
             string admin_path = $@"C:\StudyCafeTest\admin.txt";
             string bookstatus_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_bookstatus.txt";
-            string seat_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_seat.txt";
+            string seat_path = $@"C:\StudyCafeTest\seat.txt";
 
             // user 로드
 
             if (!File.Exists(user_path))
             {
-                
+              
             }
 
             else
             {
                 using (Stream user_open = new FileStream(user_path, FileMode.OpenOrCreate))
                 {
+                    
                     BinaryFormatter user_bf = new BinaryFormatter();
 
                     users = (Dictionary<string, Person>)user_bf.Deserialize(user_open);
-                    
+
                 }
             }
 
-            //
-            ////book_status 로드
-            //
-            //if (!File.Exists(bookstatus_path))
-            //{
-            //    using (Stream bookstatus_maker = new FileStream(bookstatus_path, FileMode.Create))
-            //    {
-            //        BinaryFormatter formatter = new BinaryFormatter();
-            //
-            //    }
-            //}
-            //
-            //else
-            //{
-            //    using (Stream bookstatus_open = new FileStream(bookstatus_path, FileMode.Open))
-            //    {
-            //        BinaryFormatter bookstatus_bf = new BinaryFormatter();
-            //
-            //        bookStatus = (Dictionary<ISeat, Person>)bookstatus_bf.Deserialize(bookstatus_open);
-            //    }
-            //}
-            //
-            ////seat 로드
-            //if (!File.Exists(bookstatus_path))
-            //{
-            //    using (Stream seat_maker = new FileStream(seat_path, FileMode.Create))
-            //    {
-            //        BinaryFormatter formatter = new BinaryFormatter();
-            //
-            //    }
-            //}
-            //
-            //else
-            //{
-            //    using (Stream seat_open = new FileStream(seat_path, FileMode.Open))
-            //    {
-            //        BinaryFormatter seat_bf = new BinaryFormatter();
-            //
-            //        bookStatus = (Dictionary<ISeat, Person>)seat_bf.Deserialize(seat_open);
-            //    }
-            //}
+            
+            //book_status 로드
+            
+            if (!File.Exists(bookstatus_path))
+            {
+            }
+            
+            else
+            {
+                using (Stream bookstatus_open = new FileStream(bookstatus_path, FileMode.OpenOrCreate))
+                {
+                    BinaryFormatter bookstatus_bf = new BinaryFormatter();
+            
+                    bookStatus = (Dictionary<ISeat, Person>)bookstatus_bf.Deserialize(bookstatus_open);
+                }
+            }
+            
+
+            //seat 로드
+            if (!File.Exists(seat_path))
+            {
+                Save_seat();
+            }
+            
+            else
+            {
+                using (Stream seat_open = new FileStream(seat_path, FileMode.OpenOrCreate))
+                {
+                    BinaryFormatter seat_bf = new BinaryFormatter();
+            
+                    seat = (List<ISeat>)seat_bf.Deserialize(seat_open);
+                }
+            }
         }
         private void Save_user()
         {
@@ -443,13 +515,13 @@ namespace StudyCafeManager
 
         private void Save_seat()
         {
-            string seat_path = $@"C:\StudyCafeTest\" + $"{DateTime.Now.ToString("yy.MM.dd")}_bookstatus.txt";
+            string seat_path = $@"C:\StudyCafeTest\seat.txt";
 
             using (Stream seat_save = new FileStream(seat_path, FileMode.OpenOrCreate))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
 
-                formatter.Serialize(seat_save, bookStatus);
+                formatter.Serialize(seat_save, seat);
             }
 
         }
@@ -498,6 +570,24 @@ namespace StudyCafeManager
                 }
             }
             return person;
+        }
+        private List<ISeat> CreateSeats()
+        {
+            List<ISeat> list = new List<ISeat>();
+
+            for(int i = 0; i < 10; i++)
+            {
+                list.Add(new PrivateSeat($"P-{i+1}"));
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                list.Add(new Room($"R-{i+1}"));
+            }
+            foreach (var item in list)
+            {
+                item.Status = "예약가능";
+            }
+            return list;
         }
         #endregion
     }
