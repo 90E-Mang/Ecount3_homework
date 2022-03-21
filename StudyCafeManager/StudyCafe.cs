@@ -38,13 +38,13 @@ namespace StudyCafeManager
             while (Menu)
             {
                 Console.Clear();
-                Console.WriteLine("************************************************");
-                Console.WriteLine("************************************************");
-                Console.WriteLine("*              Ecount Study Lounge             *");
-                Console.WriteLine("************************************************");
-                Console.WriteLine("************************************************");
-                Console.WriteLine("*1. 로그인         2. 가입         3. 종료     *");
-                Console.WriteLine("************************************************");
+                Console.WriteLine("*******************************************************");
+                Console.WriteLine("*******************************************************");
+                Console.WriteLine("*              Ecount Study Lounge                    *");
+                Console.WriteLine("*******************************************************");
+                Console.WriteLine("*******************************************************");
+                Console.WriteLine("*1. 로그인         2. 가입         3. 종료            *");
+                Console.WriteLine("*******************************************************");
                 Notice();
                 Console.WriteLine();
                 Console.Write("원하시는 메뉴를 선택해주세요. : ");
