@@ -1,6 +1,6 @@
 # Ecount3_homework
 
-# 2022-03-21 미니 프로젝트
+# 2022-03-21 StudyCafeManager
 
 ![슬라이드1](https://user-images.githubusercontent.com/75415437/159214848-23efcb75-4b14-4d83-8e57-d9e1c4e0cf34.JPG)
 
@@ -31,3 +31,13 @@
 # 체크리스트
 ![슬라이드18](https://user-images.githubusercontent.com/75415437/159214869-b3139c99-9452-4f2c-8438-ac098a4afc70.JPG)
 ![슬라이드19](https://user-images.githubusercontent.com/75415437/159214870-11551917-7972-4cc6-8a61-0727edf649f1.JPG)
+
+
+
+
+# 제작
+김민성 (@minzzy524) github.com/minzzy524
+안재영 (@ababqw123) github.com/ababqw123
+임현기 (@90E-Mang) github.com/90E-Mang
+정현정 (@hyeonjeongjeong) github.com/hyeonjeongjeong
+
