@@ -62,6 +62,7 @@ namespace StudyCafeManager
                         else
                         {
                             MainMenu(person);
+                            person = null;
                         }                      
                         break;
                     case "2":
@@ -148,7 +149,8 @@ namespace StudyCafeManager
                             mainMenu = false;
                             break;
                         case "6":
-                            mainMenu = false;
+                            person = null;
+                            mainMenu = false;                            
                             break;
                         default:
                             Console.WriteLine("1,2,3,4,5,6 만 입력해주세요. 엔터를 누르면 돌아갑니다.");
@@ -334,6 +336,12 @@ namespace StudyCafeManager
                         nowSeatNum = item.Key.SeatNum;
                         break;
                     }
+                }
+                if (nowSeatNum == null)
+                {
+                    Console.WriteLine("예약하신 좌석이 없습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                    Console.ReadLine();
+                    return;
                 }
                 Console.Write($"{person.Name}님이 현재 예약하신 좌석은 {nowSeatNum}입니다. 어느 좌석으로 변경하시겠습니까? 좌석을 입력해주세요 : ");
                 string input = Console.ReadLine();  //방이 맞는지 안맞는지 - > 13개 seatnum 중에 내가 입력한걸 체크해서
