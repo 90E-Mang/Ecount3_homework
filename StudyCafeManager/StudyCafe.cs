@@ -191,7 +191,7 @@ namespace StudyCafeManager
                     continue;
                 }
             }
-            Console.Write($"password : ");
+            Console.Write($"\npassword : ");
             string pw = Console.ReadLine();
 
             users.Add(email, new User(name, email, pw));
@@ -434,10 +434,15 @@ namespace StudyCafeManager
         {
             Console.Clear();
 
-            ShowAllSeat();
-            CheckAllBook();
-            if (true)   // 금지하기
+            Console.WriteLine("금지 관리 메뉴입니다.");
+            Console.WriteLine("1. 좌석 금지 2. 좌석 금지 해제");
+            string select = Console.ReadLine();
+
+            if (select == "1")   // 금지하기
             {
+                Console.Clear();
+                ShowAllSeat();
+                CheckAllBook();
                 Console.WriteLine("금지할 좌석을 선택해 주세요");
 
                 string input = Console.ReadLine();
@@ -466,10 +471,44 @@ namespace StudyCafeManager
                     Console.ReadLine();
                 }
             }
-            else                // 금지풀기
+            else if(select == "2")  // 금지풀기
             {
+                Console.Clear();
+                ShowAllSeat();
+                CheckAllBook();
+                Console.WriteLine("금지 해제 할 좌석을 선택해 주세요");
 
-            }               
+                string input = Console.ReadLine();
+
+                if (seat.Exists(x => x.SeatNum == input) && seat[seat.FindIndex(x => x.SeatNum == input)].Status == "예약금지") 
+                {
+                    Console.WriteLine("현재 좌석을 금지 해제 하시겠습니까? 1. 금지 해제 2. 뒤로가기");
+                    string choice = Console.ReadLine();
+                    if (choice == "1")
+                    {
+                        seat[seat.FindIndex(x => x.SeatNum == input)].Status = "예약가능";
+                        Save_seat();
+                        Console.WriteLine("예약 금지 해제가 완료되었습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                        Console.ReadLine();
+                    }
+                    else if (choice == "2")
+                    {
+                        Console.WriteLine("관리자 메뉴로 돌아갑니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                        Console.ReadLine();
+                    }
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("해당 좌석은 예약 금지 상태가 아닙니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                    Console.ReadLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("메뉴를 잘못 선택하셨습니다. 엔터키를 입력하면 메인으로 돌아갑니다.");
+                Console.ReadLine();
+            }
         }
         public void ShowAllBook()
         {
