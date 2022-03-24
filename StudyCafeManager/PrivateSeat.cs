@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace StudyCafeManager
 {
+    [Serializable]
     class PrivateSeat : ISeat
     {
         private string seatnum;
@@ -16,7 +18,7 @@ namespace StudyCafeManager
         }
         public string Status
         {
-            get { return Status; }
+            get { return status; }
             set { status = value; }
         }
         public PrivateSeat(string seatnum)
